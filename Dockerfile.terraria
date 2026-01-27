@@ -1,0 +1,66 @@
+# Terraria Server Dockerfile
+# Based on TShock/Terraria dedicated server setup
+
+FROM debian:bookworm-slim
+
+LABEL maintainer="coffeegrind123"
+LABEL description="Terraria Dedicated Server"
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y \
+    mono-complete \
+    unzip \
+    curl \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /terraria
+
+# Download and install Terraria Server 1.4.5.0
+RUN curl -O https://terraria.org/api/download/pc-dedicated-server/terraria-server-1450.zip && \
+    unzip terraria-server-1450.zip && \
+    rm terraria-server-1450.zip && \
+    mv 1450 TerrariaServer
+
+# Clean up unnecessary files
+RUN rm -f TerrariaServer/Linux/System* && \
+    rm -f TerrariaServer/Linux/Mono* && \
+    rm -f TerrariaServer/Linux/monoconfig && \
+    rm -f TerrariaServer/Linux/mscorlib.dll && \
+    rm -rf TerrariaServer/Mac && \
+    rm -rf TerrariaServer/Windows
+
+# Make server executable
+RUN chmod +x TerrariaServer/Linux/TerrariaServer*
+
+# Create directories
+RUN mkdir -p /terraria/world && \
+    mkdir -p /terraria/logs
+
+# Create server config file (empty, will be mounted/overwritten)
+RUN touch TerrariaServer/Linux/serverconfig.txt
+
+# Copy startup script
+COPY start-terraserver.sh /usr/local/bin/start-terraserver.sh
+RUN chmod +x /usr/local/bin/start-terraserver.sh
+
+# Expose Terraria server port
+EXPOSE 7777/tcp
+
+# Create volumes for persistent data
+VOLUME ["/terraria/world", "/terraria/logs"]
+
+# Set environment variables
+ENV TERRARIA_PORT=7777
+ENV TERRARIA_MAXPLAYERS=8
+ENV TERRARIA_WORLD=/terraria/world/world.wld
+ENV TERRARIA_AUTOCREATE=1
+ENV TERRARIA_WORLDNAME=world
+ENV TERRARIA_DIFFICULTY=0
+ENV TERRARIA_PASSWORD=""
+
+# Start the server
+CMD ["/usr/local/bin/start-terraserver.sh"]
