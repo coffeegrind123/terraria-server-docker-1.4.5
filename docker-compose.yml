@@ -1,0 +1,38 @@
+services:
+  terraria:
+    build:
+      context: .
+      dockerfile: Dockerfile.terraria
+    container_name: terraria-server
+    restart: always
+    ports:
+      - "7777:7777"  # Publish port to host
+    environment:
+      # Server Settings
+      - TERRARIA_PORT=7777
+      - TERRARIA_MAXPLAYERS=8
+      - TERRARIA_WORLDNAME=world
+      - TERRARIA_AUTOCREATE=3        # 1=Small, 2=Medium, 3=Large
+      - TERRARIA_DIFFICULTY=0         # 0=Normal, 1=Expert, 2=Master, 3=Journey
+      - TERRARIA_PASSWORD=            # Leave empty for no password
+      - TERRARIA_MOTD=Welcome to Terraria!
+      - TERRARIA_SEED=               # Optional specific seed
+    volumes:
+      # Persist world data
+      - ./world:/terraria/world
+      # Persist logs
+      - ./logs:/terraria/logs
+      # Optional: Mount custom server config (TShock)
+      # - ./config.json:/terraria/TerrariaServer/Linux/serverconfig.txt:ro
+    networks:
+      - terraria-net
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "TerrariaServer"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+
+networks:
+  terraria-net:
+    driver: bridge
