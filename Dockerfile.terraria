@@ -19,11 +19,11 @@ RUN apt-get update && \
 # Set working directory
 WORKDIR /terraria
 
-# Download and install Terraria Server 1.4.5.0
-RUN curl -O https://terraria.org/api/download/pc-dedicated-server/terraria-server-1450.zip && \
-    unzip terraria-server-1450.zip && \
-    rm terraria-server-1450.zip && \
-    mv 1450 TerrariaServer
+# Download and install Terraria Server 1.4.5.1
+RUN curl -O https://terraria.org/api/download/pc-dedicated-server/terraria-server-1451.zip && \
+    unzip terraria-server-1451.zip && \
+    rm terraria-server-1451.zip && \
+    mv 1451 TerrariaServer
 
 # Clean up unnecessary files
 RUN rm -f TerrariaServer/Linux/System* && \
