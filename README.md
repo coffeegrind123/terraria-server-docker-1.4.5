@@ -1,4 +1,4 @@
-# Terraria Server with FRP Tunnel
+# Terraria Server
 
 Dockerized Terraria dedicated server
 
