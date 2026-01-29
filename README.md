@@ -1,11 +1,10 @@
 # Terraria Server
 
-Dockerized Terraria dedicated server with automatic updates and player count announcements upon joining.
+Dockerized Terraria dedicated server with automatic updates.
 
 ## Features
 
 - **Automatic Updates** - Enumerates and installs latest Terraria server on startup, with hourly update checks
-- **Player Count Announcements** - Automatically announces player count when someone joins
 - **Remote Commands** - Execute server commands via `docker exec` eq. `docker exec cmd playing` to list online players
 - **World Persistence** - World data stored in local volume
 
@@ -36,7 +35,6 @@ terraria:
     - TERRARIA_PASSWORD=           # Leave empty for no password
     - TERRARIA_WORLDNAME=world     # World name (creates or loads this world)
     - AUTO_UPDATE_ENABLED=1        # Enable automatic updates
-    - ANNOUNCE_PLAYERS=1           # Enable player count announcements on player join
 ```
 
 ### Multiple Worlds

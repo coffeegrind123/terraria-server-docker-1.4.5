@@ -122,15 +122,6 @@ else
     echo -e "${YELLOW}Auto-update is DISABLED (set AUTO_UPDATE_ENABLED=1 to enable)${NC}"
 fi
 
-# Start player announcer if enabled
-if [ "$ANNOUNCE_PLAYERS" = "1" ]; then
-    echo -e "${GREEN}Player announcer is ENABLED${NC}"
-    /usr/local/bin/announce-players.sh &
-    echo -e "${GREEN}Player announcer started${NC}"
-else
-    echo -e "${YELLOW}Player announcer is DISABLED (set ANNOUNCE_PLAYERS=1 to enable)${NC}"
-fi
-
 # Server restart loop
 while true; do
     # Start server with a command reader that processes FIFO commands

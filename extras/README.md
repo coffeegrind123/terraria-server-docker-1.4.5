@@ -1,13 +1,12 @@
 # Terraria Server with FRP Tunnel
 
-Dockerized Terraria dedicated server with FRP integration for NAT traversal, automatic updates, and player announcements.
+Dockerized Terraria dedicated server with FRP integration for NAT traversal and automatic updates.
 
 > **VPS Setup Guide**: See [FRP_SETUP.md](./FRP_SETUP.md) (Debian/Ubuntu) for complete server installation instructions.
 
 ## Features
 
 - **Automatic Updates** - Enumerates and installs latest Terraria server on startup, with hourly update checks
-- **Player Announcements** - Automatically announces player count when someone joins
 - **Remote Commands** - Execute server commands via `docker exec`
 - **FRP Tunnel** - Expose server to internet without port forwarding
 - **World Persistence** - World data stored in local volume
@@ -58,7 +57,6 @@ terraria:
     - TERRARIA_PASSWORD=           # Leave empty for no password
     - TERRARIA_WORLDNAME=world     # World name (creates or loads this world)
     - AUTO_UPDATE_ENABLED=1        # Enable automatic updates
-    - ANNOUNCE_PLAYERS=1           # Enable player join announcements
 ```
 
 ### Multiple Worlds

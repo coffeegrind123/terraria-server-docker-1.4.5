@@ -11,8 +11,6 @@ ARG AUTO_UPDATE_ENABLED=0
 ENV AUTO_UPDATE_ENABLED=${AUTO_UPDATE_ENABLED}
 # ARG DEBUG=0
 # ENV DEBUG=${DEBUG}
-ARG ANNOUNCE_PLAYERS=0
-ENV ANNOUNCE_PLAYERS=${ANNOUNCE_PLAYERS}
 
 # Install dependencies
 RUN apt-get update && \
@@ -74,11 +72,9 @@ RUN touch TerrariaServer/Linux/serverconfig.txt
 COPY init /usr/local/bin/init
 COPY update-checker.sh /usr/local/bin/update-checker.sh
 COPY cmd /usr/local/bin/cmd
-COPY announce-players.sh /usr/local/bin/announce-players.sh
 RUN chmod +x /usr/local/bin/init && \
     chmod +x /usr/local/bin/update-checker.sh && \
-    chmod +x /usr/local/bin/cmd && \
-    chmod +x /usr/local/bin/announce-players.sh
+    chmod +x /usr/local/bin/cmd
 
 # Expose Terraria server port
 EXPOSE 7777/tcp
