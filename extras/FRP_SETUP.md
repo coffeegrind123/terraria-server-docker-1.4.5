@@ -131,13 +131,13 @@ sudo ss -tulpn | grep frps
 sudo journalctl -u frps -f
 
 # Test dashboard (from your local machine)
-curl http://123.123.123.123:7500
+curl http://your-vps-ip:7500
 # Login: admin / password
 ```
 
 ## Your Configuration
 
-**Server (VPS):** `123.123.123.123`
+**Server (VPS):** `your-vps-ip`
 - Control Port: `7000`
 - Dashboard: `7500` (admin/password)
 - Game Port: `7777`
@@ -217,10 +217,10 @@ docker-compose logs -f frp
 
 # Should see:
 # "start proxy success"
-# "connect to server 123.123.123.123:7000 success"
+# "connect to server your-vps-ip:7000 success"
 
 # From another machine, test Terraria connection
-telnet 123.123.123.123 7777
+telnet your-vps-ip 7777
 ```
 
 ## Configuration Options
@@ -349,7 +349,7 @@ Your `docker-compose.yml` is configured with:
 ```yaml
 frp:
   environment:
-    - FRP_SERVER_ADDR=123.123.123.123
+    - FRP_SERVER_ADDR=your-vps-ip
     - FRP_SERVER_PORT=7000
     - FRP_TOKEN=token_here
     - FRP_LOCAL_PORT=7777
@@ -370,9 +370,9 @@ This matches the server config above.
 ## Summary
 
 After setup:
-1. Server runs on VPS `123.123.123.123:7000`
-2. Dashboard at `http://123.123.123.123:7500` (admin/changeme)
-3. Terraria exposed on `123.123.123.123:7777`
+1. Server runs on VPS `your-vps-ip:7000`
+2. Dashboard at `http://your-vps-ip:7500` (admin/changeme)
+3. Terraria exposed on `your-vps-ip:7777`
 4. Single tunnel handles all players
 
-Players connect to: `123.123.123.123:7777`
+Players connect to: `your-vps-ip:7777`
