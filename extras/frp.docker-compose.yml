@@ -1,0 +1,68 @@
+services:
+  terraria:
+    build:
+      context: .
+      dockerfile: Dockerfile.terraria
+      args:
+        - AUTO_UPDATE_ENABLED=1    # Set to 1 to enable hourly auto-update checks
+        # - DEBUG=1                  # Set to 1 for testing (2min update checks, starts at v1450)
+        - ANNOUNCE_PLAYERS=1       # Set to 1 to enable player join announcements
+    container_name: terraria-server
+    restart: always
+    expose:
+      - "7777"  # Only expose to internal network, gotunnel handles external access
+    environment:
+      # Player Announcer (announces player count on join)
+      - ANNOUNCE_PLAYERS=1
+      # - DEBUG=1                  # For testing updates (must also set in build args)
+      # Server Settings
+      - TERRARIA_PORT=7777
+      - TERRARIA_MAXPLAYERS=8
+      - TERRARIA_WORLDNAME=world
+      - TERRARIA_AUTOCREATE=3        # 1=Small, 2=Medium, 3=Large
+      - TERRARIA_DIFFICULTY=0         # 0=Normal, 1=Expert, 2=Master, 3=Journey
+      - TERRARIA_PASSWORD=            # Leave empty for no password
+      - TERRARIA_MOTD=Welcome to Terraria!
+      - TERRARIA_SEED=               # Optional specific seed
+    volumes:
+      # Persist world data
+      - ./world:/terraria/world
+      # Persist logs
+      - ./logs:/terraria/logs
+      # Optional: Mount custom server config (TShock)
+      # - ./config.json:/terraria/TerrariaServer/Linux/serverconfig.txt:ro
+    networks:
+      - terraria-net
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "TerrariaServer"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+
+  frp:
+    build:
+      context: .
+      dockerfile: Dockerfile.frp
+    container_name: terraria-frp
+    restart: unless-stopped
+    depends_on:
+      terraria:
+        condition: service_healthy
+    environment:
+      # FRP Client Settings
+      - FRP_SERVER_ADDR=123.123.123.123              # REQUIRED: Your VPS IP address
+      - FRP_SERVER_PORT=7000                     # FRP server port (default: 7000)
+      - FRP_TOKEN=token_here              # REQUIRED: Auth token (must match server)
+      - FRP_LOCAL_PORT=7777                      # Terraria port
+      - FRP_LOCAL_HOST=terraria                  # Terraria container name
+      - FRP_REMOTE_PORT=7777                     # Port exposed on VPS
+      - FRP_PROXY_NAME=terraria                  # Proxy name (for identification)
+      - FRP_PROXY_TYPE=tcp                       # Proxy type (tcp/udp/http/https)
+    networks:
+      - terraria-net
+    # Don't expose ports - frp connects outbound to your server
+
+networks:
+  terraria-net:
+    driver: bridge
