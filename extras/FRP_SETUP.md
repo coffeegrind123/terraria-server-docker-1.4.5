@@ -37,7 +37,7 @@ rm -rf frp_*
 sudo mkdir -p /etc/frp
 
 # 3. Generate secure token
-FRP_TOKEN="token_here"
+FRP_TOKEN="your_secure_token"
 
 # 4. Create server config
 sudo tee /etc/frp/frps.toml > /dev/null << 'EOF'
@@ -51,7 +51,7 @@ webServer.user = "admin"
 webServer.password = "password"
 
 # Authentication - MUST match docker-compose.yml
-auth.token = "token_here"
+auth.token = "your_secure_token"
 
 # Optional: Limit which ports clients can expose
 allowPorts = [
@@ -141,7 +141,7 @@ curl http://your-vps-ip:7500
 - Control Port: `7000`
 - Dashboard: `7500` (admin/password)
 - Game Port: `7777`
-- Token: `token_here`
+- Token: `your_secure_token`
 
 **Client (Docker):** Already configured in `docker-compose.yml`
 
@@ -176,7 +176,7 @@ curl http://localhost:7500
 
 # Check if token matches
 grep "auth.token" /etc/frp/frps.toml
-# Should show: token_here
+# Should show: your_secure_token
 ```
 
 ### Can't see dashboard
@@ -249,7 +249,7 @@ webServer.port = 7500
 webServer.user = "admin"
 webServer.password = "password"
 
-auth.token = "token_here"
+auth.token = "your_secure_token"
 EOF
 
 sudo systemctl restart frps
@@ -351,7 +351,7 @@ frp:
   environment:
     - FRP_SERVER_ADDR=your-vps-ip
     - FRP_SERVER_PORT=7000
-    - FRP_TOKEN=token_here
+    - FRP_TOKEN=your_secure_token
     - FRP_LOCAL_PORT=7777
     - FRP_LOCAL_HOST=terraria
     - FRP_REMOTE_PORT=7777
