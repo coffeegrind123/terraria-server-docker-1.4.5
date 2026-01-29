@@ -48,7 +48,7 @@ bindPort = 7000
 webServer.addr = "0.0.0.0"
 webServer.port = 7500
 webServer.user = "admin"
-webServer.password = "password"
+webServer.password = "changeme"
 
 # Authentication - MUST match docker-compose.yml
 auth.token = "your_secure_token"
@@ -132,14 +132,14 @@ sudo journalctl -u frps -f
 
 # Test dashboard (from your local machine)
 curl http://your-vps-ip:7500
-# Login: admin / password
+# Login: admin / changeme
 ```
 
 ## Your Configuration
 
 **Server (VPS):** `your-vps-ip`
 - Control Port: `7000`
-- Dashboard: `7500` (admin/password)
+- Dashboard: `7500` (admin/changeme)
 - Game Port: `7777`
 - Token: `your_secure_token`
 
@@ -247,7 +247,7 @@ transport.tls.keyFile = "/etc/letsencrypt/live/your-domain.com/privkey.pem"
 webServer.addr = "0.0.0.0"
 webServer.port = 7500
 webServer.user = "admin"
-webServer.password = "password"
+webServer.password = "changeme"
 
 auth.token = "your_secure_token"
 EOF
@@ -294,7 +294,7 @@ The current config supports multiple clients connecting with different `remotePo
 
 1. **Change dashboard password**:
    ```bash
-   sudo sed -i 's/password/YOUR_STRONG_PASSWORD/g' /etc/frp/frps.toml
+   sudo sed -i 's/changeme/YOUR_STRONG_PASSWORD/g' /etc/frp/frps.toml
    sudo systemctl restart frps
    ```
 
