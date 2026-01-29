@@ -53,7 +53,7 @@ services:
       # FRP Client Settings
       - FRP_SERVER_ADDR=123.123.123.123              # REQUIRED: Your VPS IP address
       - FRP_SERVER_PORT=7000                     # FRP server port (default: 7000)
-      - FRP_TOKEN=token_here              # REQUIRED: Auth token (must match server)
+      - FRP_TOKEN=your_secure_token              # REQUIRED: Auth token (must match server)
       - FRP_LOCAL_PORT=7777                      # Terraria port
       - FRP_LOCAL_HOST=terraria                  # Terraria container name
       - FRP_REMOTE_PORT=7777                     # Port exposed on VPS
