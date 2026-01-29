@@ -1,12 +1,12 @@
 # Terraria Server
 
-Dockerized Terraria dedicated server with automatic updates and player announcements.
+Dockerized Terraria dedicated server with automatic updates and player count announcements upon joining.
 
 ## Features
 
 - **Automatic Updates** - Enumerates and installs latest Terraria server on startup, with hourly update checks
-- **Player Announcements** - Automatically announces player count when someone joins
-- **Remote Commands** - Execute server commands via `docker exec`
+- **Player Count Announcements** - Automatically announces player count when someone joins
+- **Remote Commands** - Execute server commands via `docker exec` eq. `docker exec cmd playing` to list online players
 - **World Persistence** - World data stored in local volume
 
 ## Quick Start
@@ -36,7 +36,7 @@ terraria:
     - TERRARIA_PASSWORD=           # Leave empty for no password
     - TERRARIA_WORLDNAME=world     # World name (creates or loads this world)
     - AUTO_UPDATE_ENABLED=1        # Enable automatic updates
-    - ANNOUNCE_PLAYERS=1           # Enable player join announcements
+    - ANNOUNCE_PLAYERS=1           # Enable player count announcements on player join
 ```
 
 ### Multiple Worlds
@@ -79,7 +79,7 @@ docker exec terraria-server cmd help
 
 When enabled, the container:
 1. Checks for updates hourly by enumerating available versions
-2. Warns players 2 minutes before restart
+2. Warns players 2 minutes in advance and also the final 30 seconds before restart
 3. Saves world and gracefully shuts down
 4. Downloads and installs update
 5. Restarts server with new version
@@ -117,6 +117,10 @@ docker-compose down
 rm ./world/world.wld
 docker-compose up -d
 ```
+OR change `TERRARIA_WORLDNAME`:
+```bash
+- TERRARIA_WORLDNAME=namehere
+```
 
 ## Commands
 
@@ -132,6 +136,9 @@ docker-compose down
 
 # Restart
 docker-compose restart
+
+# Force a clean rebuild and restart
+docker compose build --no-cache; docker compose up -d
 ```
 
 ## Server Config (Optional)
