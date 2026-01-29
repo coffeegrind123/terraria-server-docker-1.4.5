@@ -3,11 +3,18 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.terraria
+      args:
+        - AUTO_UPDATE_ENABLED=1    # Set to 1 to enable hourly auto-update checks
+        # - DEBUG=1                  # Set to 1 for testing (2min update checks, starts at v1450)
+        - ANNOUNCE_PLAYERS=1       # Set to 1 to enable player join announcements
     container_name: terraria-server
     restart: always
-    ports:
+    expose:
       - "7777:7777"  # Publish port to host
     environment:
+      # Player Announcer (announces player count on join)
+      - ANNOUNCE_PLAYERS=1
+      # - DEBUG=1                  # For testing updates (must also set in build args)
       # Server Settings
       - TERRARIA_PORT=7777
       - TERRARIA_MAXPLAYERS=8
