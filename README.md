@@ -12,6 +12,10 @@ Dockerized Terraria dedicated server with automatic updates and player announcem
 ## Quick Start
 
 ```bash
+# Clone repository
+git clone https://github.com/coffeegrind123/terraria-server-docker-1.4.5.git
+cd terraria-server-docker-1.4.5
+
 # Start server
 docker-compose up -d
 
@@ -150,6 +154,17 @@ Example `config.json`:
   "Motd": "Welcome to my Terraria Server!"
 }
 ```
+
+## FRP Tunneling Support
+
+To enable FRP tunneling for remote access behind NAT/firewalls:
+
+```bash
+cp -f extras/frp.docker-compose.yml docker-compose.yml
+cp -f extras/Dockerfile.frp .
+```
+
+See [extras/README.md](extras/README.md) for detailed setup instructions.
 
 ## Links
 
