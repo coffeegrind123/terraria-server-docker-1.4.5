@@ -4,7 +4,15 @@
 FROM debian:bookworm-slim
 
 LABEL maintainer="coffeegrind123"
-LABEL description="Terraria Dedicated Server"
+LABEL description="Terraria Dedicated Server with Auto-Update Support"
+
+# Build arguments
+ARG AUTO_UPDATE_ENABLED=0
+ENV AUTO_UPDATE_ENABLED=${AUTO_UPDATE_ENABLED}
+# ARG DEBUG=0
+# ENV DEBUG=${DEBUG}
+ARG ANNOUNCE_PLAYERS=0
+ENV ANNOUNCE_PLAYERS=${ANNOUNCE_PLAYERS}
 
 # Install dependencies
 RUN apt-get update && \
@@ -19,11 +27,30 @@ RUN apt-get update && \
 # Set working directory
 WORKDIR /terraria
 
-# Download and install Terraria Server 1.4.5.2
-RUN curl -O https://terraria.org/api/download/pc-dedicated-server/terraria-server-1452.zip && \
-    unzip terraria-server-1452.zip && \
-    rm terraria-server-1452.zip && \
-    mv 1452 TerrariaServer
+# Enumerate and download latest Terraria Server
+# DEBUG mode: skips enumeration, installs version 1450 for testing updates
+RUN echo "Finding latest Terraria server version..." && \
+    version=1450 && \
+    # if [ "$DEBUG" = "1" ]; then \
+    #     echo "DEBUG MODE: Installing version 1450 for update testing"; \
+    #     version=1450; \
+    # else \
+        while true; do \
+            next_version=$((version + 1)); \
+            echo "Checking version $next_version..."; \
+            if curl -sI "https://terraria.org/api/download/pc-dedicated-server/terraria-server-$next_version.zip" | grep -q "HTTP.*200"; then \
+                version=$next_version; \
+            else \
+                break; \
+            fi; \
+        done; \
+    # fi && \
+    echo "Latest version found: $version" && \
+    curl -O "https://terraria.org/api/download/pc-dedicated-server/terraria-server-$version.zip" && \
+    unzip "terraria-server-$version.zip" && \
+    rm "terraria-server-$version.zip" && \
+    mv "$version" TerrariaServer && \
+    echo "$version" > /tmp/terraria-version.txt
 
 # Clean up unnecessary files
 RUN rm -f TerrariaServer/Linux/System* && \
@@ -43,9 +70,15 @@ RUN mkdir -p /terraria/world && \
 # Create server config file (empty, will be mounted/overwritten)
 RUN touch TerrariaServer/Linux/serverconfig.txt
 
-# Copy startup script
-COPY start-terraserver.sh /usr/local/bin/start-terraserver.sh
-RUN chmod +x /usr/local/bin/start-terraserver.sh
+# Copy startup scripts
+COPY init /usr/local/bin/init
+COPY update-checker.sh /usr/local/bin/update-checker.sh
+COPY cmd /usr/local/bin/cmd
+COPY announce-players.sh /usr/local/bin/announce-players.sh
+RUN chmod +x /usr/local/bin/init && \
+    chmod +x /usr/local/bin/update-checker.sh && \
+    chmod +x /usr/local/bin/cmd && \
+    chmod +x /usr/local/bin/announce-players.sh
 
 # Expose Terraria server port
 EXPOSE 7777/tcp
@@ -63,4 +96,4 @@ ENV TERRARIA_DIFFICULTY=0
 ENV TERRARIA_PASSWORD=""
 
 # Start the server
-CMD ["/usr/local/bin/start-terraserver.sh"]
+CMD ["/usr/local/bin/init"]
