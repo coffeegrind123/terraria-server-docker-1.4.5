@@ -1,0 +1,103 @@
+# FRP Client Dockerfile
+# Fast reverse proxy for NAT traversal
+
+FROM alpine:latest
+
+LABEL maintainer="coffeegrind123"
+LABEL description="FRP client for exposing Terraria server"
+
+# Install dependencies
+RUN apk add --no-cache curl tar
+
+# Detect architecture and download frp binary
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+        FRP_ARCH="amd64"; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+        FRP_ARCH="arm64"; \
+    elif [ "$ARCH" = "armv7l" ]; then \
+        FRP_ARCH="arm"; \
+    else \
+        echo "Unsupported architecture: $ARCH" && exit 1; \
+    fi && \
+    echo "Downloading frp for $FRP_ARCH..." && \
+    FRP_VERSION=$(curl -s https://api.github.com/repos/fatedier/frp/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/') && \
+    echo "Latest version: $FRP_VERSION" && \
+    curl -L "https://github.com/fatedier/frp/releases/download/${FRP_VERSION}/frp_${FRP_VERSION#v}_linux_${FRP_ARCH}.tar.gz" -o /tmp/frp.tar.gz && \
+    tar -xzf /tmp/frp.tar.gz -C /tmp/ && \
+    mv /tmp/frp_${FRP_VERSION#v}_linux_${FRP_ARCH}/frpc /usr/local/bin/frpc && \
+    chmod +x /usr/local/bin/frpc && \
+    rm /tmp/frp.tar.gz && \
+    rm -rf /tmp/frp_${FRP_VERSION#v}_linux_${FRP_ARCH}
+
+# Create configuration directory
+RUN mkdir -p /etc/frp
+
+# Create startup script
+RUN cat > /usr/local/bin/start-frpc.sh << 'EOF'
+#!/bin/sh
+
+# Colors
+BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+echo "${BLUE}Starting FRP Client...${NC}"
+
+# Load environment variables
+SERVER_ADDR=${FRP_SERVER_ADDR:-""}
+SERVER_PORT=${FRP_SERVER_PORT:-"7000"}
+TOKEN=${FRP_TOKEN:-""}
+LOCAL_PORT=${FRP_LOCAL_PORT:-"7777"}
+LOCAL_HOST=${FRP_LOCAL_HOST:-"terraria"}
+REMOTE_PORT=${FRP_REMOTE_PORT:-"7777"}
+PROXY_NAME=${FRP_PROXY_NAME:-"terraria"}
+PROXY_TYPE=${FRP_PROXY_TYPE:-"tcp"}
+
+# Validate required variables
+if [ -z "$SERVER_ADDR" ]; then
+    echo "${RED}ERROR: FRP_SERVER_ADDR not set!${NC}"
+    echo "${YELLOW}Example: FRP_SERVER_ADDR=your-vps-ip${NC}"
+    exit 1
+fi
+
+# Generate TOML configuration
+cat > /etc/frp/frpc.toml << TOML
+serverAddr = "${SERVER_ADDR}"
+serverPort = ${SERVER_PORT}
+auth.token = "${TOKEN}"
+
+[[proxies]]
+name = "${PROXY_NAME}"
+type = "${PROXY_TYPE}"
+localIP = "${LOCAL_HOST}"
+localPort = ${LOCAL_PORT}
+remotePort = ${REMOTE_PORT}
+TOML
+
+# Print configuration
+echo "${GREEN}========================================${NC}"
+echo "${GREEN}FRP Client Configuration${NC}"
+echo "${GREEN}========================================${NC}"
+echo "Server: ${SERVER_ADDR}:${SERVER_PORT}"
+echo "Local Service: ${LOCAL_HOST}:${LOCAL_PORT}"
+echo "Remote Port: ${REMOTE_PORT}"
+echo "Proxy Type: ${PROXY_TYPE}"
+echo "${GREEN}========================================${NC}"
+echo "${YELLOW}Connecting to FRP server...${NC}"
+echo ""
+
+# Start frpc
+exec /usr/local/bin/frpc -c /etc/frp/frpc.toml
+EOF
+
+RUN chmod +x /usr/local/bin/start-frpc.sh
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD pgrep -f frpc || exit 1
+
+# Start frpc
+CMD ["/usr/local/bin/start-frpc.sh"]
