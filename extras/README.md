@@ -170,68 +170,6 @@ docker-compose down
 docker-compose restart
 ```
 
-## Troubleshooting
-
-**FRP not connecting?**
-```bash
-# Check logs
-docker-compose logs frp
-
-# Verify server is running on VPS
-ssh your-vps "rc-service frps status"
-
-# Verify token matches
-grep auth.token /etc/frp/frps.toml  # On VPS
-docker-compose exec frp env | grep FRP_TOKEN  # Local
-```
-
-**Players can't connect?**
-- Check VPS firewall allows port 7777: `ssh your-vps "iptables -L -n | grep 7777"`
-- Verify FRP token matches on server and client
-- Ensure Terraria server is healthy: `docker-compose ps`
-- Check FRP dashboard: `http://your-vps-ip:7500`
-
-**Connection timeout?**
-- Check VPS firewall: ports 7000, 7777, 7500 must be open
-- Verify FRP server is running: `ssh your-vps "rc-service frps status"`
-- Test from VPS: `telnet localhost 7777`
-
-## VPS Setup Quick Reference
-
-On your Alpine VPS:
-
-```bash
-# 1. Download FRP
-ARCH=$(uname -m)
-FRP_VERSION=$(curl -s https://api.github.com/repos/fatedier/frp/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-curl -L "https://github.com/fatedier/frp/releases/download/${FRP_VERSION}/frp_${FRP_VERSION#v}_linux_${ARCH}.tar.gz" -o frp.tar.gz
-tar -xzf frp.tar.gz
-mv frp*/frps /usr/local/bin/
-
-# 2. Create config
-mkdir -p /etc/frp
-SECURE_TOKEN=$(head -c 32 /dev/urandom | base64)
-cat > /etc/frp/frps.toml << EOF
-bindPort = 7000
-auth.token = "$SECURE_TOKEN"
-webServer.addr = "0.0.0.0"
-webServer.port = 7500
-webServer.user = "admin"
-webServer.password = "changeme"
-EOF
-
-# 3. Open firewall
-iptables -A INPUT -p tcp --dport 7000 -j ACCEPT
-iptables -A INPUT -p tcp --dport 7777 -j ACCEPT
-iptables -A INPUT -p tcp --dport 7500 -j ACCEPT
-
-# 4. Start service
-rc-update add frps default
-rc-service frps start
-```
-
-See [FRP-DEBIAN-SETUP.md](./FRP_SETUP.md) (Debian/Ubuntu) for a complete guide.
-
 ## Server Config (Optional)
 
 For advanced configuration, mount a custom config file:
